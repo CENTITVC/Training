@@ -1,0 +1,3 @@
+/Software/README.md
+/Software/Server
+/Software/DevServer

@@ -1,0 +1,15 @@
+# ------ Global ------
+* @CENTITVC/codeowners
+
+# ------ Documents & .md files ------
+/Documents/ # Add PME
+*.md # Add PME
+
+# ------ Firmware folder ------
+/Firmware/ @CENTITVC/firmware-reviewers
+
+# ------ Hardware folder ------
+/Hardware/ @CENTITVC/hardware-reviewers
+
+# ------ Software folder ------
+/Software/ @CENTITVC/software-reviewers

@@ -45,6 +45,9 @@ static int g_manager_state    = 0;
 /* Mode ButtonLED state. */
 static int g_button_led_state = 0;
 
+/* Mode Temperature state. */
+static int g_temperature_state = 0;
+
 /* ************************************************************************************ */
 /* * Macros                                                                           * */
 /* ************************************************************************************ */
@@ -179,26 +182,19 @@ void I2C_Read(uint8_t   i2c_address,
 uint8_t SHT31_CRC_Calculate(const uint8_t * data_vec,
                             uint8_t         data_vec_size)
 {
-    uint8_t crc = 0xFF; // Initialization value
-    uint8_t polynomial = 0x31; // CRC-8 polynomial (x^8 + x^5 + x^4 + 1)
+    uint8_t crc = 0xFF;
+    uint8_t polynomial = 0x31;
 
     for (size_t i = 0; i < data_vec_size; i++)
     {
-        crc ^= data_vec[i]; // XOR with input data
+        crc ^= data_vec[i];
         for (uint8_t j = 0; j < 8; j++)
         {
-            if (crc & 0x80)
-            {
-                crc = (crc << 1) ^ polynomial;
-            }
-            else
-            {
-                crc <<= 1;
-            }
+            crc = (crc & 0x80) ? (crc << 1) ^ polynomial : (crc << 1);
         }
     }
 
-    return crc ^ 0x00; // Final XOR value (0x00, no change)
+    return crc;
 }
 
 void Delay_ms(uint16_t ms)
@@ -235,6 +231,7 @@ void Manager_Initialize(void)
 
     g_manager_state     = 0;
     g_button_led_state  = 0;
+    g_temperature_state = 0;
 
     MANAGER_DEBUG("Manager: ... Initialized.\n");
 }
@@ -431,14 +428,87 @@ static void ButtonLED_FSM(void)
 
 static void Temperature_FSM(void)
 {
-    float temp, hum = 0;
+    enum {
+        STATE_INIT          =  0,
+        STATE_IDLE          =  1,
+        STATE_GET_DATA      =  2,
+        STATE_UPDATE_LEDS   =  3,
+        STATE_DEFINE_BASE   =  4,
+    };
 
-    SHT31_GetData(&temp, &hum);
+    static float temp_base = 0;
+    static float temp, hum = 0;
+    static uint32_t last_get_tick = 0;
 
-    MANAGER_DEBUG("Temperature: %f\n", temp);
-    MANAGER_DEBUG("Humidity: %f\n", hum);
+    if (UI_GetButtonState() == BUTTON_PRESSED)
+    {
+        g_temperature_state = STATE_DEFINE_BASE;
+    }
 
-    HAL_Delay(5000);
+    switch (g_temperature_state)
+    {
+        case STATE_INIT:
+        {
+            temp_base = 24.0f;
+
+            g_temperature_state = STATE_GET_DATA;
+            break;
+        }
+        case STATE_IDLE:
+        {
+            if (HAL_GetTick() - last_get_tick >= 500)
+            {
+                g_temperature_state = STATE_GET_DATA;
+                break;
+            }
+
+            break;
+        }
+        case STATE_GET_DATA:
+        {
+            SHT31_GetData(&temp, &hum);
+
+            MANAGER_DEBUG("Temperature mode: Temperature: %0.2f\n", temp);
+            MANAGER_DEBUG("Temperature mode: Humidity: %0.2f\n", hum);
+
+            last_get_tick = HAL_GetTick();
+
+            g_temperature_state = STATE_UPDATE_LEDS;
+        }
+        case STATE_UPDATE_LEDS:
+        {
+            if (temp >= (temp_base - 1.0))  UI_SetLEDState(0, LED_ON);
+            else                            UI_SetLEDState(0, LED_OFF);
+
+            if (temp >= (temp_base + 0.5))  UI_SetLEDState(1, LED_ON);
+            else                            UI_SetLEDState(1, LED_OFF);
+
+            if (temp >= (temp_base + 1.0))  UI_SetLEDState(2, LED_ON);
+            else                            UI_SetLEDState(2, LED_OFF);
+
+            if (temp >= (temp_base + 1.5))  UI_SetLEDState(3, LED_ON);
+            else                            UI_SetLEDState(3, LED_OFF);
+
+            g_temperature_state = STATE_IDLE;
+            break;
+        }
+        case STATE_DEFINE_BASE:
+        {
+            /* Wait for button to be released. */
+            while (UI_GetButtonState() == BUTTON_PRESSED);
+
+            MANAGER_DEBUG("Temperature mode: Redefining base temperature.\n");
+
+            SHT31_GetData(&temp, &hum);
+
+            MANAGER_DEBUG("Temperature mode: Temperature: %0.2f\n", temp);
+
+            temp_base = temp;
+
+            g_temperature_state = STATE_GET_DATA;
+            break;
+        }
+    }
 }
 
 

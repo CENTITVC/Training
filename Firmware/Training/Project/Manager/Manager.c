@@ -9,9 +9,17 @@
 /* ************************************************************************************ */
 
 #include <stdio.h>
+
 #include "stm32f4xx.h"
+#include "stm32f4xx_hal_exti.h"
+#include "stm32f4xx_hal_gpio.h"
+#include "stm32f4xx_hal_i2c.h"
+#include "i2c.h"
+
 #include "Manager.h"
+
 #include "../UI/UI.h"
+#include "../Sensors/SHT31.h"
 
 /* ************************************************************************************ */
 /* * Private Functions                                                                * */
@@ -79,19 +87,156 @@ static void ButtonLED_FSM(void);
 static void Temperature_FSM(void);
 
 /* ************************************************************************************ */
+/* * HAL Functions                                                                    * */
+/* ************************************************************************************ */
+
+void HAL_GPIO_EXTI_Callback(uint16_t gpio_pin)
+{
+    if (gpio_pin == GPIO_PIN_3)
+    {
+        UI_ISR_Button();
+    }
+    else if (gpio_pin == GPIO_PIN_2)
+    {
+        UI_ISR_Slider();
+    }
+}
+
+void LED0_SetPin(bool state)
+{
+    if (state)
+    {
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);
+    }
+    else
+    {
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_SET);
+    }
+}
+
+void LED1_SetPin(bool state)
+{
+    if (state)
+    {
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_RESET);
+    }
+    else
+    {
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
+    }
+}
+
+void LED2_SetPin(bool state)
+{
+    if (state)
+    {
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+    }
+    else
+    {
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
+    }
+}
+
+void LED3_SetPin(bool state)
+{
+    if (state)
+    {
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+    }
+    else
+    {
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+    }
+}
+
+bool Button_GetState(void)
+{
+    return (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_3) == GPIO_PIN_SET) ? BUTTON_RELEASED : BUTTON_PRESSED;
+}
+
+bool Slider_GetState(void)
+{
+    return (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2) == GPIO_PIN_SET) ? SLIDER_INACTIVE : SLIDER_ACTIVE;
+}
+
+void I2C_Write(uint8_t   i2c_address,
+               uint8_t * tx_vec,
+               uint8_t   tx_vec_size)
+{
+    HAL_I2C_Master_Transmit(&hi2c1, (uint16_t)(i2c_address << 1), &(tx_vec[0]),
+                            tx_vec_size, 1000);
+}
+
+void I2C_Read(uint8_t   i2c_address,
+              uint8_t * rx_vec,
+              uint8_t   rx_vec_size)
+{
+    HAL_I2C_Master_Receive(&hi2c1, (uint16_t)(i2c_address << 1), &(rx_vec[0]),
+                           rx_vec_size, 1000);
+}
+
+uint8_t SHT31_CRC_Calculate(const uint8_t * data_vec,
+                            uint8_t         data_vec_size)
+{
+    uint8_t crc = 0xFF; // Initialization value
+    uint8_t polynomial = 0x31; // CRC-8 polynomial (x^8 + x^5 + x^4 + 1)
+
+    for (size_t i = 0; i < data_vec_size; i++)
+    {
+        crc ^= data_vec[i]; // XOR with input data
+        for (uint8_t j = 0; j < 8; j++)
+        {
+            if (crc & 0x80)
+            {
+                crc = (crc << 1) ^ polynomial;
+            }
+            else
+            {
+                crc <<= 1;
+            }
+        }
+    }
+
+    return crc ^ 0x00; // Final XOR value (0x00, no change)
+}
+
+void Delay_ms(uint16_t ms)
+{
+    HAL_Delay(ms);
+}
+
+/* ************************************************************************************ */
 /* * Public Functions                                                                 * */
 /* ************************************************************************************ */
 
 void Manager_Initialize(void)
 {
-    MANAGER_DEBUG("Manager will be initialized...\n");
+    st_UI_CONFIG ui_config = {
+        .Button_GetPin  = Button_GetState,
+        .Slider_GetPin  = Slider_GetState,
+        .LED0_SetPin    = LED0_SetPin,
+        .LED1_SetPin    = LED1_SetPin,
+        .LED2_SetPin    = LED2_SetPin,
+        .LED3_SetPin    = LED3_SetPin,
+    };
+    st_SHT31_CONFIG sht31_config = {
+        .i2c_address    = SHT31_I2C_ADDRESS_GND,
+        .I2C_Write      = I2C_Write,
+        .I2C_Read       = I2C_Read,
+        .CRC_Calculate  = SHT31_CRC_Calculate,
+        .Delay_ms       = Delay_ms,
+    };
 
-    UI_Initialize();
+    MANAGER_DEBUG("Manager: Initializing...\n");
+
+    UI_Initialize(ui_config);
+    SHT31_Initialize(sht31_config);
 
     g_manager_state     = 0;
     g_button_led_state  = 0;
 
-    MANAGER_DEBUG("... Manager initialized.\n");
+    MANAGER_DEBUG("Manager: ... Initialized.\n");
 }
 
 void Manager_Loop(void)
@@ -286,7 +431,14 @@ static void ButtonLED_FSM(void)
 
 static void Temperature_FSM(void)
 {
-    // TODO: ...
+    float temp, hum = 0;
+
+    SHT31_GetData(&temp, &hum);
+
+    MANAGER_DEBUG("Temperature: %f\n", temp);
+    MANAGER_DEBUG("Humidity: %f\n", hum);
+
+    HAL_Delay(5000);
 }
 
 

@@ -4,68 +4,52 @@
  * Author:  CeNTI
  */
 
-/* ********** Includes ********** */
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdint.h>
+/* ************************************************************************************ */
+/* * Includes                                                                         * */
+/* ************************************************************************************ */
 
-#include "stm32f4xx.h"
-#include "stm32f4xx_hal_exti.h"
-#include "stm32f4xx_hal_gpio.h"
 #include "UI.h"
 
+/* ************************************************************************************ */
+/* * Global Variables                                                                 * */
+/* ************************************************************************************ */
 
-/* ********** Defines ********** */
-#define UI_BUTTON_GROUP_AND_PIN     UI_BUTTON_GROUP, UI_BUTTON_PIN
-#define UI_SLIDER_GROUP_AND_PIN     UI_SLIDER_GROUP, UI_SLIDER_PIN
-#define UI_LED0_GROUP_AND_PIN       UI_LED0_GROUP, UI_LED0_PIN
-#define UI_LED1_GROUP_AND_PIN       UI_LED1_GROUP, UI_LED1_PIN
-#define UI_LED2_GROUP_AND_PIN       UI_LED2_GROUP, UI_LED2_PIN
-#define UI_LED3_GROUP_AND_PIN       UI_LED3_GROUP, UI_LED3_PIN
-
-
-/* ********** Global Variables ********** */
+static st_UI_CONFIG g_config = {};
 static bool g_button_pressed  = false;
 static bool g_slider_position = false;
 
-/* ********** ISR Functions ********** */
-void HAL_GPIO_EXTI_Callback(uint16_t gpio_pin)
+/* ************************************************************************************ */
+/* * ISR Functions                                                                    * */
+/* ************************************************************************************ */
+
+void UI_ISR_Button(void)
 {
-    if (gpio_pin == UI_BUTTON_PIN)
-    {
-        if (HAL_GPIO_ReadPin(UI_BUTTON_GROUP_AND_PIN) == GPIO_PIN_RESET)
-        {
-            g_button_pressed = true;
-        }
-        else
-        {
-            g_button_pressed = false;
-        }
-    }
-    else if (gpio_pin == UI_SLIDER_PIN)
-    {
-        if (HAL_GPIO_ReadPin(UI_SLIDER_GROUP_AND_PIN) == GPIO_PIN_RESET)
-        {
-            g_slider_position = true;
-        }
-        else
-        {
-            g_slider_position = false;
-        }
-    }
+    g_button_pressed = g_config.Button_GetPin();
 }
 
-
-/* ********** Functions ********** */
-void UI_Initialize(void)
+void UI_ISR_Slider(void)
 {
-    g_button_pressed = (HAL_GPIO_ReadPin(UI_BUTTON_GROUP_AND_PIN) == GPIO_PIN_RESET) ? true : false;
-    g_slider_position = (HAL_GPIO_ReadPin(UI_SLIDER_GROUP_AND_PIN) == GPIO_PIN_RESET) ? true : false;
+    g_slider_position = g_config.Slider_GetPin();
+}
 
-    HAL_GPIO_WritePin(UI_LED0_GROUP_AND_PIN, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(UI_LED1_GROUP_AND_PIN, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(UI_LED2_GROUP_AND_PIN, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(UI_LED3_GROUP_AND_PIN, GPIO_PIN_SET);
+/* ************************************************************************************ */
+/* * Public Functions                                                                 * */
+/* ************************************************************************************ */
+
+void UI_Initialize(st_UI_CONFIG config)
+{
+    /* Save configuration. */
+    g_config = config;
+
+    /* Get initial state for button and slider. */
+    g_button_pressed = config.Button_GetPin();
+    g_slider_position = config.Slider_GetPin();
+
+    /* Initialize LEDs Off*/
+    config.LED0_SetPin(LED_OFF);
+    config.LED1_SetPin(LED_OFF);
+    config.LED2_SetPin(LED_OFF);
+    config.LED3_SetPin(LED_OFF);
 }
 
 bool UI_GetButtonState(void)
@@ -78,24 +62,24 @@ bool UI_GetSliderState(void)
     return g_slider_position;
 }
 
-void UI_SetLEDState(uint8_t led, bool state)
+void UI_SetLEDState(uint8_t led,
+                    bool    state)
 {
     switch (led)
     {
         case 0:
-            HAL_GPIO_WritePin(UI_LED0_GROUP_AND_PIN, (state) ? GPIO_PIN_RESET : GPIO_PIN_SET);
+            g_config.LED0_SetPin(state);
             break;
         case 1:
-            HAL_GPIO_WritePin(UI_LED1_GROUP_AND_PIN, (state) ? GPIO_PIN_RESET : GPIO_PIN_SET);
+            g_config.LED1_SetPin(state);
             break;
         case 2:
-            HAL_GPIO_WritePin(UI_LED2_GROUP_AND_PIN, (state) ? GPIO_PIN_RESET : GPIO_PIN_SET);
+            g_config.LED2_SetPin(state);
             break;
         case 3:
-            HAL_GPIO_WritePin(UI_LED3_GROUP_AND_PIN, (state) ? GPIO_PIN_RESET : GPIO_PIN_SET);
+            g_config.LED3_SetPin(state);
             break;
         default:
-            printf("Warning: Invalid LED number %d\n", led);
             break;
     }
 }

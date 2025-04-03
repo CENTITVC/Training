@@ -4,33 +4,41 @@
  * Author:  CeNTI
  */
 
-#ifndef __UI_H__
-#define __UI_H__
+#ifndef __PROJECT_UI_UI_H__
+#define __PROJECT_UI_UI_H__
 
-/* ********** Includes ********** */
-#include "stdbool.h"
-#include "stdint.h"
+/* ************************************************************************************ */
+/* * Includes                                                                         * */
+/* ************************************************************************************ */
 
+#include <stdbool.h>
+#include <stdint.h>
 
-/* ********** Defines ********** */
-#define UI_BUTTON_GROUP             GPIOC
-#define UI_BUTTON_PIN               GPIO_PIN_3
-#define UI_SLIDER_GROUP             GPIOC
-#define UI_SLIDER_PIN               GPIO_PIN_2
-#define UI_LED0_GROUP               GPIOC
-#define UI_LED0_PIN                 GPIO_PIN_7
-#define UI_LED1_GROUP               GPIOC
-#define UI_LED1_PIN                 GPIO_PIN_8
-#define UI_LED2_GROUP               GPIOC
-#define UI_LED2_PIN                 GPIO_PIN_9
-#define UI_LED3_GROUP               GPIOA
-#define UI_LED3_PIN                 GPIO_PIN_8
+/* ************************************************************************************ */
+/* * Defines                                                                          * */
+/* ************************************************************************************ */
 
+/* LEDs states. */
+#define LED_ON                      true
+#define LED_OFF                     false
 
-/* ********** Structures ********** */
+/* Button states. */
+#define BUTTON_PRESSED              true
+#define BUTTON_RELEASED             false
+
+/* Slider states. */
+#define SLIDER_ACTIVE               true
+#define SLIDER_INACTIVE             false
+
+/* ************************************************************************************ */
+/* * Typedefs                                                                         * */
+/* ************************************************************************************ */
+
+/* GPIO set/get functions typedefs. */
 typedef void (*t_GPIO_SetPin)(bool state);
 typedef bool (*t_GPIO_GetPin)(void);
 
+/* UI configuration structure. */
 typedef struct {
     t_GPIO_SetPin   LED0_SetPin;
     t_GPIO_SetPin   LED1_SetPin;
@@ -41,30 +49,79 @@ typedef struct {
     t_GPIO_GetPin   Slider_GetPin;
 }st_UI_CONFIG;
 
+/* ************************************************************************************ */
+/* * Public Functions Prototypes                                                      * */
+/* ************************************************************************************ */
 
-/* ********** Functions Prototypes ********** */
 /**
  * @brief Initialize the UI module.
+ *
+ * @note The functions UI_ISR_Button and UI_ISR_Slider must be called in the GPIO external
+ *       interrupt handlers.
+ *
+ * @param[in]   config  UI configuration.
+ *
+ * @return  None.
+ */
+void UI_Initialize(st_UI_CONFIG config);
+
+/**
+ * @brief Get the actual button state.
+ *
+ * @param   None.
+ *
+ * @return  Button state.
+ * @retval  BUTTON_PRESSED      Button is pressed.
+ * @retval  BUTTON_RELEASED     Button is released.
+ *  */
+bool UI_GetButtonState(void);
+
+/**
+ * @brief Get the actual slider state.
+ *
+ * @param   None.
+ *
+ * @return  Slider state.
+ * @retval  SLIDER_ACTIVE       Slider is in the active state.
+ * @retval  SLIDER_INACTIVE     Slider is in the inactive state.
+ */
+bool UI_GetSliderState(void);
+
+/**
+ * @brief Set the LED state.
+ *
+ * @param[in]   led     LED number (between 0 and 3).
+ * @param[in]   state   LED state.
+ *                      - LED_ON: Turn on;
+ *                      - LED_OFF: Turn off.
+ *
+ * @return  None.
+ */
+void UI_SetLEDState(uint8_t led,
+                    bool    state);
+
+/**
+ * @brief Button external interrupt handler.
+ *
+ * @note This function must be called in the GPIO external interrupt handler.
  *
  * @param   None.
  *
  * @return  None.
  */
-void UI_Initialize(void);
-
-/* */
-bool UI_GetButtonState(void);
-
-/*  */
-bool UI_GetSliderState(void);
-
-/*  */
-void UI_SetLEDState(uint8_t led, bool state);
-
 void UI_ISR_Button(void);
 
+/**
+ * @brief Slider external interrupt handler.
+ *
+ * @note This function must be called in the GPIO external interrupt handler.
+ *
+ * @param   None.
+ *
+ * @return  None.
+ */
 void UI_ISR_Slider(void);
 
-#endif /* __UI_H__ */
+#endif /* __PROJECT_UI_UI_H__ */
 
 /* -- End of file -- */

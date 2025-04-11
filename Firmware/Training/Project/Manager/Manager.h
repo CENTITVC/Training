@@ -4,8 +4,8 @@
  * Author:  CeNTI
  */
 
-#ifndef __MANAGER_H__
-#define __MANAGER_H__
+#ifndef __PROJECT_MANAGER_MANAGER_H__
+#define __PROJECT_MANAGER_MANAGER_H__
 
 /* ********** Functions Prototypes ********** */
 /**
@@ -26,6 +26,7 @@ void Manager_Initialize(void);
  */
 void Manager_Loop(void);
 
-#endif /* __MANAGER_H__ */
+
+#endif /* __PROJECT_MANAGER_MANAGER_H__ */
 
 /* -- End of file -- */

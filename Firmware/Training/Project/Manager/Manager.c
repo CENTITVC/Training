@@ -35,12 +35,17 @@
 #define BUTTON_LED_TICKS_BETWEEN_ON         (1000)
 #define BUTTON_LED_TICKS_BETWEEN_OFF        (500)
 
+/* Acquisition period.  */
+#define TEMPERATURE_MODE_ACQUISITION_TICKS  (500)
+/* Base temperature. */
+#define TEMPERATURE_MODE_TEMP_BASE_DEFAULT  (24.0f)
+
 /* ************************************************************************************ */
 /* * Global Variables                                                                 * */
 /* ************************************************************************************ */
 
 /* Manager state. */
-static int g_manager_state    = 0;
+static int g_manager_state = 0;
 
 /* Mode ButtonLED state. */
 static int g_button_led_state = 0;
@@ -81,7 +86,8 @@ static void ButtonLED_FSM(void);
 /**
  * @brief   Temperature Finite State Machine (FSM).
  *
- * @details 
+ * @details This function will read the temperature and humidity data from the SHT31
+ *          sensor.
  *
  * @param   None.
  *
@@ -182,7 +188,7 @@ void I2C_Read(uint8_t   i2c_address,
 uint8_t SHT31_CRC_Calculate(const uint8_t * data_vec,
                             uint8_t         data_vec_size)
 {
-    uint8_t crc = 0xFF;
+    uint8_t crc        = 0xFF;
     uint8_t polynomial = 0x31;
 
     for (size_t i = 0; i < data_vec_size; i++)
@@ -275,6 +281,7 @@ void Manager_Loop(void)
             }
 
             ButtonLED_FSM();
+
             break;
         }
         case STATE_TEMPERATURE:
@@ -288,12 +295,14 @@ void Manager_Loop(void)
             }
 
             Temperature_FSM();
+
             break;
         }
         default:
         {
             MANAGER_DEBUG("Warning: Invalid state %d.\n", g_manager_state);
             g_manager_state = STATE_IDLE;
+
             break;
         }
     }
@@ -340,6 +349,7 @@ static void ButtonLED_FSM(void)
             {
                 g_button_led_state = STATE_TURN_OFF;
                 initial_ticks      = HAL_GetTick();
+
                 break;
             }
 
@@ -363,6 +373,7 @@ static void ButtonLED_FSM(void)
 
                 initial_ticks = HAL_GetTick();
             }
+
             break;
         }
         case STATE_TURN_OFF:
@@ -372,6 +383,7 @@ static void ButtonLED_FSM(void)
             {
                 g_button_led_state = STATE_TURN_ON;
                 initial_ticks      = HAL_GetTick();
+
                 break;
             }
 
@@ -396,6 +408,7 @@ static void ButtonLED_FSM(void)
 
                 initial_ticks = HAL_GetTick();
             }
+
             break;
         }
         case STATE_MINIMUM:
@@ -406,6 +419,7 @@ static void ButtonLED_FSM(void)
                 g_button_led_state = STATE_TURN_ON;
                 initial_ticks      = HAL_GetTick();
                 led_index          = 0;
+
                 break;
             }
 
@@ -418,8 +432,17 @@ static void ButtonLED_FSM(void)
             {
                 g_button_led_state = STATE_TURN_OFF;
                 initial_ticks      = HAL_GetTick();
+
                 break;
             }
+
+            break;
+        }
+        default:
+        {
+            MANAGER_DEBUG("Warning: Invalid state %d.\n", g_button_led_state);
+            g_button_led_state = STATE_INIT;
+            led_index          = 0;
 
             break;
         }
@@ -436,8 +459,8 @@ static void Temperature_FSM(void)
         STATE_DEFINE_BASE   =  4,
     };
 
-    static float temp_base = 0;
-    static float temp, hum = 0;
+    static float    temp_base     = 0;
+    float           temp, hum     = 0;
     static uint32_t last_get_tick = 0;
 
     if (UI_GetButtonState() == BUTTON_PRESSED)
@@ -449,14 +472,14 @@ static void Temperature_FSM(void)
     {
         case STATE_INIT:
         {
-            temp_base = 24.0f;
-
+            temp_base           = TEMPERATURE_MODE_TEMP_BASE_DEFAULT;
             g_temperature_state = STATE_GET_DATA;
+
             break;
         }
         case STATE_IDLE:
         {
-            if (HAL_GetTick() - last_get_tick >= 500)
+            if ((HAL_GetTick() - last_get_tick) >= TEMPERATURE_MODE_ACQUISITION_TICKS)
             {
                 g_temperature_state = STATE_GET_DATA;
                 break;
@@ -490,6 +513,7 @@ static void Temperature_FSM(void)
             else                            UI_SetLEDState(3, LED_OFF);
 
             g_temperature_state = STATE_IDLE;
+
             break;
         }
         case STATE_DEFINE_BASE:
@@ -501,11 +525,18 @@ static void Temperature_FSM(void)
 
             SHT31_GetData(&temp, &hum);
 
+            temp_base           = temp;
+            g_temperature_state = STATE_GET_DATA;
+
             MANAGER_DEBUG("Temperature mode: Temperature: %0.2f\n", temp);
 
-            temp_base = temp;
+            break;
+        }
+        default:
+        {
+            MANAGER_DEBUG("Warning: Invalid state %d.\n", g_temperature_state);
+            g_temperature_state = STATE_INIT;
 
-            g_temperature_state = STATE_GET_DATA;
             break;
         }
     }

@@ -14,7 +14,10 @@
 /* * Global Variables                                                                 * */
 /* ************************************************************************************ */
 
+/* UI configuration. */
 static st_UI_CONFIG g_config = {};
+
+/* Button and slider states. */
 static bool g_button_pressed  = false;
 static bool g_slider_position = false;
 
@@ -42,7 +45,7 @@ void UI_Initialize(st_UI_CONFIG config)
     g_config = config;
 
     /* Get initial state for button and slider. */
-    g_button_pressed = config.Button_GetPin();
+    g_button_pressed  = config.Button_GetPin();
     g_slider_position = config.Slider_GetPin();
 
     /* Initialize LEDs Off*/

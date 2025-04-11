@@ -31,12 +31,16 @@
 #define SLIDER_INACTIVE             false
 
 /* ************************************************************************************ */
-/* * Typedefs                                                                         * */
+/* * Function types                                                                   * */
 /* ************************************************************************************ */
 
 /* GPIO set/get functions typedefs. */
 typedef void (*t_GPIO_SetPin)(bool state);
 typedef bool (*t_GPIO_GetPin)(void);
+
+/* ************************************************************************************ */
+/* * Structure types                                                                  * */
+/* ************************************************************************************ */
 
 /* UI configuration structure. */
 typedef struct {
@@ -104,6 +108,8 @@ void UI_SetLEDState(uint8_t led,
  * @brief Button external interrupt handler.
  *
  * @note This function must be called in the GPIO external interrupt handler.
+ *       The GPIO external interrupt must be configured to trigger on the rising and
+ *       falling edges.
  *
  * @param   None.
  *
@@ -115,12 +121,15 @@ void UI_ISR_Button(void);
  * @brief Slider external interrupt handler.
  *
  * @note This function must be called in the GPIO external interrupt handler.
+ *       The GPIO external interrupt must be configured to trigger on the rising and
+ *       falling edges.
  *
  * @param   None.
  *
  * @return  None.
  */
 void UI_ISR_Slider(void);
+
 
 #endif /* __PROJECT_UI_UI_H__ */
 

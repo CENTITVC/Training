@@ -4,7 +4,7 @@
 > FW: 01.00 \
 > HW: 01.00
 
-This firmware is capable of swap between two operation modes:
+This firmware is capable of swapping between two operation modes:
 - LEDs follow the button;
 - LEDs follow the temperature.
 
@@ -18,12 +18,12 @@ Each LED should turn on every second and turn off every half a second.
 </p>
 
 > [!Note]
-> When an LED is turn on/off, it should be indicated in the UART.
+> When an LED is turned on/off, it should be indicated in the UART.
 
 ### LEDs follow the temperature
-In this mode, the LEDs should represent the ambient temperature based on a initial temperature.
+In this mode, the LEDs should represent the ambient temperature based on an initial temperature.
 - When the temperature is between -1ºC and +0.5ºC in comparison to the based temperature, the first LED should be on;
-- When the temperature is bellow the based temperature by 1ºC, all the LEDs should be off;
+- When the temperature is below the based temperature by 1ºC, all the LEDs should be off;
 - When the temperature is above the based temperature by 0.5ºC, 1ºC, and 1.5ºC the second green, orange, and red LEDs should be on, respectively.
 
 It is also possible to set a new base temperature by pressing the button. This will change the default temperature (24ºC) for a new base temperature.
@@ -33,11 +33,11 @@ It is also possible to set a new base temperature by pressing the button. This w
 </p>
 
 > [!Note]
-> Every half a second, the temperature and humidity values are updated and printed in the UART.
+> The temperature and humidity values are updated and printed in the UART every half a second.
 
 
 ## How to use
-To swap between mode, just use the switch.
+To swap between modes, use the switch.
 
 When in the ***LEDs follow the button*** mode just press the button continuously to turn on each LED at a time. Release the button for them to start turn off.
 

@@ -1,31 +1,40 @@
 # Firmware
 > Versions:
 >
-> FW: MM.mm \
-> HW: MM.mm \
-> CeNTI_Library: MM.mm
->
-> *(If multiple Microcontrollers used: Repeat for each microcontroller code)*
+> FW: 01.00 \
+> HW: 01.00
 
-*(Brief description about the firmware)*
+This firmware is capable of swap between two operation modes:
+- LEDs follow the button;
+- LEDs follow the temperature.
+
+### LEDs follow the button
+In this mode, the LEDs should start turning on while the button is being pressed. When the button is released, the LEDs should start turning off. When they are turning on, it should start with the first green, then the second green, then the orange, and lastly the red.
+
+Each LED should turn on every second and turn off every half a second.
+
+![First challenge](../Documents/Images/First_challenge.png)
+
+> [!Note]
+> When an LED is turn on/off, it should be indicated in the UART.
+
+### LEDs follow the temperature
+In this mode, the LEDs should represent the ambient temperature based on a initial temperature.
+- When the temperature is between -1ºC and +0.5ºC in comparison to the based temperature, the first LED should be on;
+- When the temperature is bellow the based temperature by 1ºC, all the LEDs should be off;
+- When the temperature is above the based temperature by 0.5ºC, 1ºC, and 1.5ºC the second green, orange, and red LEDs should be on, respectively.
+
+It is also possible to set a new base temperature by pressing the button. This will change the default temperature (24ºC) for a new base temperature.
+
+![Second challenge](../Documents/Images/Second_challenge.png)
+
+> [!Note]
+> Every half a second, the temperature and humidity values are updated and printed in the UART.
 
 
 ## How to use
-*(Information explaining on how to use the system and the expected outputs)*\
-*(List all the configurations and defines possible to change)*
+To swap between mode, just use the switch.
 
+When in the ***LEDs follow the button*** mode just press the button continuously to turn on each LED at a time. Release the button for them to start turn off.
 
-## Tests
-*(Images/Prints showing the system working)*
-
-
-## Project Configuration
-### Pinout
-*(Pinout image, followed by pin description)*
-
-### Components Configuration
-*(List of all the components used and their configuration)*
-
-
-## Extra Information
-*(Optional: Space to add additional information)*
+When in the ***LEDs follow the temperature*** mode just press the button to set the base temperature (if wanted) and let the system react with the temperature variations.

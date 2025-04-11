@@ -1,31 +1,12 @@
 # Firmware
 > Versions:
 >
-> FW: MM.mm \
-> HW: MM.mm \
-> CeNTI_Library: MM.mm
->
-> *(If multiple Microcontrollers used: Repeat for each microcontroller code)*
+> STM32CubeIDE: 1.15 or above \
+> HW: 01.00
 
-*(Brief description about the firmware)*
+The challenge is composed by several parts that will be explained after. The goal is to learn how to create a project, how to read a hardware datasheet, and how to solve a problem. For this challenge will be used the hardware "PCB_formacao_1v0".
 
-
-## How to use
-*(Information explaining on how to use the system and the expected outputs)*\
-*(List all the configurations and defines possible to change)*
-
-
-## Tests
-*(Images/Prints showing the system working)*
-
-
-## Project Configuration
-### Pinout
-*(Pinout image, followed by pin description)*
-
-### Components Configuration
-*(List of all the components used and their configuration)*
-
-
-## Extra Information
-*(Optional: Space to add additional information)*
+The challenge will be separated into three parts:
+- [First challenge](First_challenge/)
+- [Second challenge](Second_challenge/)
+- (Optional) [Extra challenge](Extra_challenge/)

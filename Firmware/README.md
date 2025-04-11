@@ -13,7 +13,9 @@ In this mode, the LEDs should start turning on while the button is being pressed
 
 Each LED should turn on every second and turn off every half a second.
 
-![First challenge](../Documents/Images/First_challenge.png)
+<p align="center">
+  <img src="../Documents/Images/First_challenge.png" style="background-color: white; padding: 10px;">
+</p>
 
 > [!Note]
 > When an LED is turn on/off, it should be indicated in the UART.
@@ -26,7 +28,9 @@ In this mode, the LEDs should represent the ambient temperature based on a initi
 
 It is also possible to set a new base temperature by pressing the button. This will change the default temperature (24ºC) for a new base temperature.
 
-![Second challenge](../Documents/Images/Second_challenge.png)
+<p align="center">
+  <img src="../Documents/Images/Second_challenge.png" style="background-color: white; padding: 10px;">
+</p>
 
 > [!Note]
 > Every half a second, the temperature and humidity values are updated and printed in the UART.

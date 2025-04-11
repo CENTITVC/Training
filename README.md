@@ -1,22 +1,9 @@
-# *(Project Title)*
-*(One brief line of project description goes here.)*
+# Training
+Challenge used on training day.
 
 
 ## Description
-*(Small description of the project. Some text is copied from IDINET project folder for instance.)*
-
-[Link to idinet](LINK)
-
-
-## Electronic System Solution
-*(Here you can describe the electronic system solution in detail. Explain the technologies used, the overall architecture of the system, and how it addresses identified requirements or problems.)*
-
-*(Remember to include relevant information such as diagrams, charts, or links to more detailed technical documentation, if applicable.)*
-
-### Software Details
-Provide detailed information about the software components of your project, including the application, frontend, and backend server. Explain the technologies used, the architecture, and any significant modules or functionalities.
-
-[Software README](Software/README.md)
+The main goal for this training challenge is to introduce to the embedded software work flow.
 
 
 ### Firmware Details
@@ -34,7 +21,6 @@ Provide detailed information about the hardware component of your project. Inclu
 ## Repository Contents
 | Folders/Files     | Description                                                       |
 |:------------------|:------------------------------------------------------------------|
-| `Software`        | Folder containing code and software components                    |
 | `Firmware`        | Folder containing firmware project.                               |
 | `Hardware`        | Folder containing PCB design files.                               |
 | `Documents`       | Folder containing datasheet, pinout image and extra information.  |

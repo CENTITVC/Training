@@ -8,6 +8,8 @@
 /* * Includes                                                                         * */
 /* ************************************************************************************ */
 
+#include <stdio.h>
+
 #include "UI.h"
 
 /* ************************************************************************************ */
@@ -22,17 +24,40 @@ static bool g_button_pressed  = false;
 static bool g_slider_position = false;
 
 /* ************************************************************************************ */
+/* * Macros                                                                           * */
+/* ************************************************************************************ */
+
+/* Manager debug. */
+#if ((defined(UI_DEBUG_LEVEL) && (UI_DEBUG_LEVEL > 0)))
+    #define UI_DEBUG(...) printf("[D]: " __VA_ARGS__)
+#else
+    #define UI_DEBUG(...)
+#endif
+
+/* ************************************************************************************ */
 /* * ISR Functions                                                                    * */
 /* ************************************************************************************ */
 
 void UI_ISR_Button(void)
 {
-    g_button_pressed = g_config.Button_GetPin();
+    #if (UI_INVERT_BUTTON == 1)
+        g_button_pressed = (g_config.Button_GetPin() ? BUTTON_RELEASED : BUTTON_PRESSED);
+    #else
+        g_button_pressed = (g_config.Button_GetPin() ? BUTTON_PRESSED : BUTTON_RELEASED);
+    #endif
+
+    UI_DEBUG("Button %s\n", g_button_pressed ? "pressed" : "released");
 }
 
 void UI_ISR_Slider(void)
 {
-    g_slider_position = g_config.Slider_GetPin();
+    #if (UI_INVERT_SLIDER == 1)
+        g_slider_position = (g_config.Slider_GetPin() ? SLIDER_INACTIVE : SLIDER_ACTIVE);
+    #else
+        g_slider_position = (g_config.Slider_GetPin() ? SLIDER_ACTIVE : SLIDER_INACTIVE);
+    #endif
+
+    UI_DEBUG("Slider %s\n", g_slider_position ? "active" : "inactive");
 }
 
 /* ************************************************************************************ */
@@ -68,6 +93,14 @@ bool UI_GetSliderState(void)
 void UI_SetLEDState(uint8_t led,
                     bool    state)
 {
+    UI_DEBUG("LED %d %s\n", led, state == LED_ON ? "on" : "off");
+
+    #if (UI_INVERT_LED == 1)
+        state = (state == LED_ON ? false : true);
+    #else
+        state = (state == LED_ON ? true : false);
+    #endif
+
     switch (led)
     {
         case 1:

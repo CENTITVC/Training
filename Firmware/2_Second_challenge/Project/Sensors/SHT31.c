@@ -44,6 +44,20 @@ static inline float HumidityConverter(uint16_t raw_hum)
 #define Delay_ms(_ms) g_config.Delay_ms(_ms)
 
 /* ************************************************************************************ */
+/* * Private Functions Prototypes                                                     * */
+/* ************************************************************************************ */
+
+/**
+ * @brief Calculate the CRC of the SHT31 sensor.
+ *
+ * @param[in]  data_vec         Pointer to array with the CRC data.
+ * @param[in]  data_vec_size    CRC array size.
+ *
+ * @return  Calculated CRC value.
+ */
+uint8_t CRC_Calculate(const uint8_t * data_vec, uint8_t data_vec_size);
+
+/* ************************************************************************************ */
 /* * Communication Functions                                                          * */
 /* ************************************************************************************ */
 
@@ -64,14 +78,15 @@ void COM_Read6Bytes(uint16_t * data_1_ptr,
 
     g_config.I2C_Read(g_config.i2c_address, rx_data_vec, 6);
 
-    if ((rx_data_vec[2] == g_config.CRC_Calculate(&rx_data_vec[0], 2)) &&
-        (rx_data_vec[5] == g_config.CRC_Calculate(&rx_data_vec[3], 2)) )
+    if ((rx_data_vec[2] == CRC_Calculate(&rx_data_vec[0], 2)) &&
+        (rx_data_vec[5] == CRC_Calculate(&rx_data_vec[3], 2)))
     {
         *data_1_ptr = (uint16_t)((rx_data_vec[0] << 8) | rx_data_vec[1]);
         *data_2_ptr = (uint16_t)((rx_data_vec[3] << 8) | rx_data_vec[4]);
     }
     else
     {
+        SHT31_DEBUG("SHT31: Invalid CRC obtained.\n");
         *data_1_ptr = 0;
         *data_2_ptr = 0;
     }
@@ -108,7 +123,7 @@ void SHT31_GetData(float * temp_ptr,
 {
     uint16_t raw_temp, raw_hum = 0;
 
-    COM_WriteRegister(SHT31_CMD_SINGLE_MEDIUM_STRETCH);
+    COM_WriteRegister(SHT31_CMD_REPEAT_MEDIUM_STRETCH);
 
     COM_Read6Bytes(&raw_temp, &raw_hum);
 
@@ -117,6 +132,27 @@ void SHT31_GetData(float * temp_ptr,
 
     SHT31_DEBUG("SHT31: Temperature: %f\n", *temp_ptr);
     SHT31_DEBUG("SHT31: Humidity: %f\n", *hum_ptr);
+}
+
+/* ************************************************************************************ */
+/* * Private Functions                                                                * */
+/* ************************************************************************************ */
+
+uint8_t CRC_Calculate(const uint8_t * data_vec, uint8_t   data_vec_size)
+{
+    uint8_t crc        = 0xFF;
+    uint8_t polynomial = 0x31;
+
+    for (size_t i = 0; i < data_vec_size; i++)
+    {
+        crc ^= data_vec[i];
+        for (uint8_t j = 0; j < 8; j++)
+        {
+            crc = (crc & 0x80) ? (crc << 1) ^ polynomial : (crc << 1);
+        }
+    }
+
+    return crc;
 }
 
 /* -- End of file -- */

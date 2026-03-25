@@ -1,7 +1,7 @@
 # Training repository
-This repository has a challenge for the embedded software team. The main goal for this challenge is to show the work flow of the embedded software.
+This repository has a challenge that shows the typical work flow of the embedded software team.
 
-The challenge it self is in the Firmware folder.
+This challenge can be found in the Firmware folder.
 
 
 ### Firmware Details

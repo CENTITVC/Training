@@ -18,15 +18,18 @@ The image above shows what should happen when the button is pressed or released.
 ## Steps
 
 ### 1. Create a Project
-- Open STM32CubeIDE and create a project for the STM32F401RBT6 microcontroller.
+- Open STM32CubeIDE/STM32CubeMX and create a project for the STM32F401RBT6 microcontroller.
 
 ### 2. Add Peripherals and Set Pinout
-- Open the folder "[Hardware](../../Hardware/)" in this repository. Inside, you will find a PDF file containing the hardware datasheet. Look for the sheet with the microcontroller pinout to check which pins are in use.
+- Open the folder "[Hardware](../../Hardware/)" in this repository.
+- Import the `PCB_Formacao.zip` into your personal <a href="https://365.altium.com/files">Altium 365 workspace</a> and open that file. Alternatively, you can check the information about the PCB in the `PCB_Formacao.pdf` file.
+- Look for the sheet with the microcontroller pinout to check which pins are in use.
 - For this challenge, identify the pins for the LEDs (LED1, LED2, LED3, LED4) and the button (Button1).
 - No additional peripherals are needed for this challenge.
 
 ### 3. Add the "Project" Folder to Your STM32 Project
 - Copy the "Project" folder and add it to your STM32 project.
+- Don't forget to include that folder in the STM project properties ('Properties'/'C/C++ General'/'Paths and Symbols'/'Source Location'/'Add Folder...')
 
 ### 4. Call the Manager Functions
 - To keep the `main.c` file clean, the core logic will be written in `manager.c`.
@@ -39,4 +42,13 @@ The image above shows what should happen when the button is pressed or released.
 - Adapt your code in `manager.c` to use the UI API. **Do not modify the UI API.**
 
 ### 7. (Optional) Enable `printf` for Debugging
-- Enable `printf` functionality to assist with debugging.
+- Enable `printf` functionality to assist with debugging, by configuring the UART peripheral and defining the following function in your main.c file.
+```c
+/* USER CODE BEGIN 4 */
+int __io_putchar(int ch)
+{
+  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF);
+  return ch;
+}
+/* USER CODE END 4 */
+```

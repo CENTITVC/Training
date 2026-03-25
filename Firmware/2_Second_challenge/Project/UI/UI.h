@@ -15,22 +15,6 @@
 #include <stdint.h>
 
 /* ************************************************************************************ */
-/* * Configurations                                                                   * */
-/* ************************************************************************************ */
-
-/* UI debug. 0: Disabled; 1: Enabled. */
-#define UI_DEBUG_LEVEL              (0)
-
-/* Button inversion. 0: Disabled; 1: Enabled. */
-#define UI_INVERT_BUTTON            (0)
-
-/* Slider inversion. 0: Disabled; 1: Enabled. */
-#define UI_INVERT_SLIDER            (0)
-
-/* LED inversion. 0: Disabled; 1: Enabled. */
-#define UI_INVERT_LED               (0)
-
-/* ************************************************************************************ */
 /* * Defines                                                                          * */
 /* ************************************************************************************ */
 

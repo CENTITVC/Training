@@ -44,10 +44,10 @@ typedef bool (*t_GPIO_GetPin)(void);
 
 /* UI configuration structure. */
 typedef struct {
-    t_GPIO_SetPin   LED0_SetPin;
     t_GPIO_SetPin   LED1_SetPin;
     t_GPIO_SetPin   LED2_SetPin;
     t_GPIO_SetPin   LED3_SetPin;
+    t_GPIO_SetPin   LED4_SetPin;
 
     t_GPIO_GetPin   Button_GetPin;
     t_GPIO_GetPin   Slider_GetPin;
@@ -94,7 +94,7 @@ bool UI_GetSliderState(void);
 /**
  * @brief Set the LED state.
  *
- * @param[in]   led     LED number (between 0 and 3).
+ * @param[in]   led     LED number (between 1 and 4).
  * @param[in]   state   LED state.
  *                      - LED_ON: Turn on;
  *                      - LED_OFF: Turn off.

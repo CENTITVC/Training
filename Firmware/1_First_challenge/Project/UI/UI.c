@@ -49,10 +49,10 @@ void UI_Initialize(st_UI_CONFIG config)
     g_slider_position = config.Slider_GetPin();
 
     /* Initialize LEDs Off*/
-    config.LED0_SetPin(LED_OFF);
     config.LED1_SetPin(LED_OFF);
     config.LED2_SetPin(LED_OFF);
     config.LED3_SetPin(LED_OFF);
+    config.LED4_SetPin(LED_OFF);
 }
 
 bool UI_GetButtonState(void)
@@ -70,9 +70,6 @@ void UI_SetLEDState(uint8_t led,
 {
     switch (led)
     {
-        case 0:
-            g_config.LED0_SetPin(state);
-            break;
         case 1:
             g_config.LED1_SetPin(state);
             break;
@@ -81,6 +78,9 @@ void UI_SetLEDState(uint8_t led,
             break;
         case 3:
             g_config.LED3_SetPin(state);
+            break;
+        case 4:
+            g_config.LED4_SetPin(state);
             break;
         default:
             break;

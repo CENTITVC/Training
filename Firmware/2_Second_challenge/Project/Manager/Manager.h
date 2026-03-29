@@ -1,7 +1,7 @@
 /**
  * Path:    Project/Manager
  * File:    Manager.h
- * Author:  CeNTI
+ * Author:  
  */
 
 #ifndef __PROJECT_MANAGER_MANAGER_H__
